@@ -22,6 +22,9 @@ import compiler.lang.core.Core
 
 import resource._
 
+import scala.collection.immutable.Queue
+import scala.concurrent.Future
+
 import java.io.FileWriter
 import java.nio.file.Path
 
@@ -129,6 +132,12 @@ trait GraphTools extends Common
       for(pw <- managed(new FileWriter(targetPath.toAbsolutePath.toString))) {
         pw.write(mkJsonGraph(id, tree).toString())
       }
+      tree
+    }
+
+    def mkJsonGraphAsString[T](id: String)(eventually: String => scala.concurrent.Future[T])(tree: u.Tree): u.Tree = {
+      val pretty = mkJsonGraph(id, tree).prettyPrint
+      eventually(pretty)
       tree
     }
 

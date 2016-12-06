@@ -24,20 +24,33 @@ import io.csv._
 
 import akka.actor.ActorSystem
 
+import scala.reflect.internal.util
+
 object Test extends App {
   import akka.stream._
   import akka.stream.scaladsl._
 
   implicit val system = ActorSystem("test-system")
+  implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer()
 
   val compiler = new RuntimeCompiler()
-  import compiler._
 
+  import compiler._
 
   // Source(1 to 10).runWith(Sink.foreach(println))
 
-  val mkJsonGraph = GraphTools.
+//  val sourceQueue = akka.stream.scaladsl.Source.queue[String](5, akka.stream.OverflowStrategy.backpressure)
+//  val q = sourceQueue.toMat(Sink.foreach(println)) { (queue ,_) =>
+//    val liftPipeline: u.Expr[Any] => u.Tree =
+//      compiler.pipeline(typeCheck = true)(
+//        LibSupport.expand,
+//        GraphTools.mkJsonGraphAsString(s"post-expand")(s => queue.offer(s)),
+//        Core.lift,
+//        GraphTools.mkJsonGraphAsString(s"post-lift")(s => queue.offer(s))
+//      ).compose(_.tree)
+//    liftPipeline(coreExpr)
+//  }
 
   val anfPipeline: u.Expr[Any] => u.Tree =
     compiler.pipeline(typeCheck = true)(
@@ -50,12 +63,11 @@ object Test extends App {
       Core.lift
     ).compose(_.tree)
 
-  type Edge[T] = (T, T)
+  final case class Edge[V](src: V, dst: V)
 
   val input: String = null
   val output: String = null
   val csv = CSV()
-
 
   val coreExpr = anfPipeline(u.reify {
     // read in a directed graph
@@ -71,9 +83,9 @@ object Test extends App {
       val closure = comprehension[Edge[Int], DataBag] {
         val e1 = generator[Edge[Int], DataBag](paths$3)
         val e2 = generator[Edge[Int], DataBag](paths$3)
-        guard(e1._2 == e2._1)
+        guard(e1.dst == e2.src)
         head {
-          (e1._1, e2._2)
+          Edge(e1.src, e2.dst)
         }
       }
 
@@ -95,5 +107,6 @@ object Test extends App {
 
     doWhile$1(added$1, count$1, paths$1)
   })
+
 
 }
