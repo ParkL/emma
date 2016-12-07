@@ -58,6 +58,12 @@
             <artifactId>emma-language</artifactId>
             <type>test-jar</type>
         </dependency>
+        <!-- for now -->
+        <dependency>
+            <groupId>org.emmalanguage</groupId>
+            <artifactId>emma-examples-library</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
 
         <!-- Test -->
         <dependency>

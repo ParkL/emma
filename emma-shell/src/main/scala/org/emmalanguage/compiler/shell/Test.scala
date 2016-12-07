@@ -17,13 +17,17 @@ package org.emmalanguage
 package compiler.shell
 
 import api._
+import api.Meta._
 import api.Meta.Projections._
 import org.emmalanguage.compiler.RuntimeCompiler
 import compiler.ir.ComprehensionSyntax._
 import io.csv._
+import org.emmalanguage.examples.graphs.TransitiveClosure
+import org.emmalanguage.examples.graphs.model.Edge
 
 import akka.actor.ActorSystem
 
+import scala.concurrent.Await
 import scala.reflect.internal.util
 
 object Test extends App {
@@ -40,73 +44,38 @@ object Test extends App {
 
   // Source(1 to 10).runWith(Sink.foreach(println))
 
-//  val sourceQueue = akka.stream.scaladsl.Source.queue[String](5, akka.stream.OverflowStrategy.backpressure)
-//  val q = sourceQueue.toMat(Sink.foreach(println)) { (queue ,_) =>
-//    val liftPipeline: u.Expr[Any] => u.Tree =
-//      compiler.pipeline(typeCheck = true)(
-//        LibSupport.expand,
-//        GraphTools.mkJsonGraphAsString(s"post-expand")(s => queue.offer(s)),
-//        Core.lift,
-//        GraphTools.mkJsonGraphAsString(s"post-lift")(s => queue.offer(s))
-//      ).compose(_.tree)
-//    liftPipeline(coreExpr)
-//  }
+  def interleave(pipeline: Seq[u.Tree => u.Tree], insert: String => u.Tree => u.Tree): Seq[u.Tree => u.Tree] =
+    pipeline.zipWithIndex.flatMap { case (tf, i) => Seq(tf, insert(s"stage-$i"))  }
 
-  val anfPipeline: u.Expr[Any] => u.Tree =
-    compiler.pipeline(typeCheck = true)(
-      Core.anf
-    ).compose(_.tree)
+  val sourceQueue = akka.stream.scaladsl.Source.queue[String](5, akka.stream.OverflowStrategy.backpressure)
 
-  val liftPipeline: u.Expr[Any] => u.Tree =
-    compiler.pipeline(typeCheck = true)(
-      LibSupport.expand,
-      Core.lift
-    ).compose(_.tree)
+  val queue = sourceQueue.to(Sink.foreach(println)).run()
 
-  final case class Edge[V](src: V, dst: V)
+  // IntelliJ Covariance / Contravariance Highlight error with String => Unit
+  val applyName = GraphTools.mkJsonGraphAsString(enqueue) _
+
+  val enqueue: GraphTools.EnqueueEffect[String] = queue.offer
+
+  val liftStages = Seq(LibSupport.expand, Core.lift)
+  val liftInterleaved = interleave(liftStages, applyName)
+  val lift = compiler.pipeline(typeCheck = true)(liftInterleaved:_*)
+  val liftPipeline: u.Expr[Any] => u.Tree = lift.compose(_.tree)
 
   val input: String = null
   val output: String = null
   val csv = CSV()
+  implicit val edgeCSVConverter = CSVConverter[Edge[Int]]
 
-  val coreExpr = anfPipeline(u.reify {
-    // read in a directed graph
-    val input = this.input
-    val csv$1 = this.csv
-    val readCSV = DataBag.readCSV[Edge[Int]](input, csv$1)
-    val paths$1 = readCSV.distinct
-    val count$1 = paths$1.size
-    val added$1 = 0L
-
-    def doWhile$1(added$3: Long, count$3: Long, paths$3: DataBag[Edge[Int]]): Unit = {
-
-      val closure = comprehension[Edge[Int], DataBag] {
-        val e1 = generator[Edge[Int], DataBag](paths$3)
-        val e2 = generator[Edge[Int], DataBag](paths$3)
-        guard(e1.dst == e2.src)
-        head {
-          Edge(e1.src, e2.dst)
-        }
-      }
-
-      val paths$2 = (paths$3 union closure).distinct
-      val added$2 = paths$2.size - count$3
-      val count$2 = paths$2.size
-      val isReady = added$2 > 0
-
-      def suffix$1(): Unit = {
-        val closure = paths$2
-        val output = this.output
-        val csv$2 = this.csv
-        closure.writeCSV(output, csv$2)
-      }
-
-      if (isReady) doWhile$1(added$2, count$2, paths$2)
-      else suffix$1()
-    }
-
-    doWhile$1(added$1, count$1, paths$1)
+  val sourceExpr = liftPipeline(u.reify {
+    // read an initial collection of edges
+    val edges = DataBag.readCSV[Edge[Int]](input, csv)
+    // compute the transitive closure of the edges
+    val closure = TransitiveClosure(edges)
+    // write the results into a CSV file
+    closure.writeCSV(output, csv)
   })
 
+  import scala.concurrent.duration._
+  Await.result(system.terminate(), 5.seconds)
 
 }

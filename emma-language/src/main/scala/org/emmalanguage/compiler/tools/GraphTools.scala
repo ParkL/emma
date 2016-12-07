@@ -135,9 +135,12 @@ trait GraphTools extends Common
       tree
     }
 
-    def mkJsonGraphAsString[T](id: String)(eventually: String => scala.concurrent.Future[T])(tree: u.Tree): u.Tree = {
-      val pretty = mkJsonGraph(id, tree).prettyPrint
-      eventually(pretty)
+    // the queue is actually
+    // String => scala.concurrent.Future[QueueOfferResult] // unknown here
+    // String => scala.concurrent.Future[Future]
+    type EnqueueEffect[T] = T => Unit
+    def mkJsonGraphAsString[T](eventually: EnqueueEffect[String])(id: String)(tree: u.Tree): u.Tree = {
+      eventually(mkJsonGraph(id, tree).prettyPrint) // needs executioncontext to consume
       tree
     }
 
