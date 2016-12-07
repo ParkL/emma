@@ -29,7 +29,7 @@ import akka.actor.ActorSystem
 
 import scala.concurrent.Await
 
-object Test extends App {
+object EmmaInStream extends App {
   import akka.stream._
   import akka.stream.scaladsl._
 
