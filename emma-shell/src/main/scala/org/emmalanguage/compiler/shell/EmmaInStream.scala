@@ -48,16 +48,15 @@ object EmmaInStream extends App {
 
   val sourceQueue = akka.stream.scaladsl.Source.queue[String](5, akka.stream.OverflowStrategy.backpressure)
   val queue = sourceQueue.to(Sink.foreach(println)).run()
-  // IntelliJ Covariance / Contravariance Highlight error with String => Unit
-  val enqueue: GraphTools.EnqueueEffect[String] = queue.offer
 
-  val applyName = GraphTools.mkJsonGraphAsString(enqueue) _
+  val applyName = GraphTools.mkJsonGraphAsString(queue.offer) _
 
   val liftStages = Seq(LibSupport.expand, Core.lift)
   val liftStagesWithEnqueueEffects = interleave(liftStages, applyName)
   val lift = compiler.pipeline(typeCheck = true)(liftStagesWithEnqueueEffects:_*)
   val liftPipeline: u.Expr[Any] => u.Tree = lift.compose(_.tree)
 
+  // The Program
   val input: String = null
   val output: String = null
   val csv = CSV()
