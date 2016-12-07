@@ -28,7 +28,6 @@ import org.emmalanguage.examples.graphs.model.Edge
 import akka.actor.ActorSystem
 
 import scala.concurrent.Await
-import scala.reflect.internal.util
 
 object Test extends App {
   import akka.stream._
@@ -48,17 +47,15 @@ object Test extends App {
     pipeline.zipWithIndex.flatMap { case (tf, i) => Seq(tf, insert(s"stage-$i"))  }
 
   val sourceQueue = akka.stream.scaladsl.Source.queue[String](5, akka.stream.OverflowStrategy.backpressure)
-
   val queue = sourceQueue.to(Sink.foreach(println)).run()
-
   // IntelliJ Covariance / Contravariance Highlight error with String => Unit
-  val applyName = GraphTools.mkJsonGraphAsString(enqueue) _
-
   val enqueue: GraphTools.EnqueueEffect[String] = queue.offer
 
+  val applyName = GraphTools.mkJsonGraphAsString(enqueue) _
+
   val liftStages = Seq(LibSupport.expand, Core.lift)
-  val liftInterleaved = interleave(liftStages, applyName)
-  val lift = compiler.pipeline(typeCheck = true)(liftInterleaved:_*)
+  val liftStagesWithEnqueueEffects = interleave(liftStages, applyName)
+  val lift = compiler.pipeline(typeCheck = true)(liftStagesWithEnqueueEffects:_*)
   val liftPipeline: u.Expr[Any] => u.Tree = lift.compose(_.tree)
 
   val input: String = null
