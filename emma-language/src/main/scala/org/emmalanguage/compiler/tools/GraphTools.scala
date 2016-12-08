@@ -139,7 +139,7 @@ trait GraphTools extends Common
     // String => scala.concurrent.Future[QueueOfferResult] // unknown here
     // String => scala.concurrent.Future[Any]
     type EnqueueEffect[T] = T => Unit
-    def mkJsonGraphAsString[T](eventually: EnqueueEffect[String])(id: String)(tree: u.Tree): u.Tree = {
+    def mkJsonGraphAsString(eventually: EnqueueEffect[String])(id: String)(tree: u.Tree): u.Tree = {
       eventually(mkJsonGraph(id, tree).prettyPrint) // needs executioncontext to consume
       tree
     }

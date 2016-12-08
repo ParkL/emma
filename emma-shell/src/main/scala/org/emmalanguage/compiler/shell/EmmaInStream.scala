@@ -46,7 +46,9 @@ object EmmaInStream extends App {
   def interleave(pipeline: Seq[u.Tree => u.Tree], insert: String => u.Tree => u.Tree): Seq[u.Tree => u.Tree] =
     pipeline.zipWithIndex.flatMap { case (tf, i) => Seq(tf, insert(s"stage-$i"))  }
 
+  // OverflowStrategy.backpressure not a good idea here...rather use a big buffer and fail
   val sourceQueue = akka.stream.scaladsl.Source.queue[String](5, akka.stream.OverflowStrategy.backpressure)
+  // not runWith, we don't want the Sink's materialized value, want to Keep.left
   val queue = sourceQueue.to(Sink.foreach(println)).run()
 
   val applyName = GraphTools.mkJsonGraphAsString(queue.offer) _
