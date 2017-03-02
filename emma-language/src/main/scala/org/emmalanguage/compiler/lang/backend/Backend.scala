@@ -23,7 +23,8 @@ import compiler.lang.core.Core
 trait Backend extends Common
   with Caching
   with Order
-  with Specialization {
+  with Specialization
+  with Debug {
   this: Core =>
 
   import UniverseImplicits._
@@ -36,5 +37,6 @@ trait Backend extends Common
 
     /** Delegates to [[Caching.addCacheCalls]]. */
     lazy val addCacheCalls = Caching.addCacheCalls
+    lazy val addGuiDatabagCalls = Debug.addGuiDatabagCalls
   }
 }
