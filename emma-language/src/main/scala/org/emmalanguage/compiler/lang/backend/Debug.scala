@@ -30,6 +30,10 @@ private[backend] trait Debug extends Common { self: Backend with Core =>
     // TODO cross, equiJoin
     lazy val addGuiDatabagCalls: u.Tree => u.Tree =
       api.BottomUp.withUses.withRoot.transformSyn {
+        // val rs1 = db1.map(_ * 2) if uses of the symbol > 1
+        //   =>
+        // val rs1$2 = db1$2.map(_ * 2)
+        // val rs1$1 = GuiDataBag.ref(rs1$2, "rs1")
         case Attr(core.ValDef(lhs, rhs), _, Some(root) :: _, syn)
           if syn(root).head(lhs) > 1 =>
           val lhsOp = api.TermSym(
@@ -51,6 +55,9 @@ private[backend] trait Debug extends Common { self: Backend with Core =>
             ),
             Seq.empty,
             core.Ref(lhs)))
+
+        // Redirect calls to the Bag Module
+        // DatBag.apply(1 to 10) => GuiDataBag(1 to 10)
         case Attr.none(core.DefCall(Some(core.Ref(sym)), member, tpes, argss))
           if sym == API.bagModuleSymbol && (API.sourceOps contains member) =>
           core.DefCall(

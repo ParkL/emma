@@ -102,7 +102,7 @@ object GuiDataBag {
   def readText(path: String): DataBag[String] =
     new GuiDataBag[String](DataBag.readText(path), ReadText(path))
 
-  def readParquet[A: ParquetConverter](path: String, format: Parquet): DataBag[A] =
+  def readParquet[A: ParquetConverter : Meta](path: String, format: Parquet): DataBag[A] =
     new GuiDataBag[A](DataBag.readParquet(path, format), ReadParquet(path, format))
 
   def cross[A: Meta, B: Meta](xs: DataBag[A], ys: DataBag[B])
