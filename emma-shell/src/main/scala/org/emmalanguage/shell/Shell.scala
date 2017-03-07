@@ -27,6 +27,7 @@ object Shell extends App with LineModel {
   implicit val system = ActorSystem("emma-shell-as")
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
+  import gui.Model._
 
   // API:
   //
@@ -34,6 +35,8 @@ object Shell extends App with LineModel {
   // post /ExampleId/run -> Session-ID
   // get /Session-ID -> Option[Graph] // may stall until available in "host" stalls when delivered unless done
   // put /Session-ID/continue -> Option[Graph] // if Session-Id is stalling, starts the next stage
+
+  val flow =  Map("map", ReadText("textPath"))
 
   val route =
     pathSingleSlash {
@@ -45,10 +48,15 @@ object Shell extends App with LineModel {
       get {
         complete(s"Hello World")
       }
+    } ~
+    path("test") {
+      get {
+        complete(flow)
+      }
     }
 
   val server = Http().bindAndHandle(route, "localhost", 8080)
-  println("Running…")
+  println("Press any key to shut down.")
   StdIn.readLine()
   server.flatMap(_.unbind()).onComplete(_ => system.terminate())
 }
