@@ -79,6 +79,33 @@ class GuiDataBagSpec extends BaseCompilerSpec {
 
       act shouldBe alphaEqTo(exp)
     }
+    """Read Parquet problematic stuff""" in {
+      val input: String = null
+      val output: String = null
+
+      val act = liftCombineInsert(u.reify{
+        val docs = DataBag.readText(input)
+        val words = docs.map(_.toLowerCase().split("\\W+"))
+        val counts = words.groupBy(Predef.identity).map(g => (g.key, g.values.size))
+        counts.writeText(output)
+      })
+
+      val act2 = liftCombineInsert(u.reify{
+        val words = for {
+          line <- DataBag.readText(input)
+          word <- DataBag[String](line.toLowerCase.split("\\W+"))
+        } yield word
+
+        val counts = for {
+          group <- words.groupBy(Predef.identity)
+        } yield (group.key, group.values.size)
+        counts.writeText(output)
+      })
+
+
+      println(act2)
+    }
+
     """Marshaling / unmarshaling""" in {
       val map: DataFlow = Map("map", ReadText("textPath"))
       val json = map.toJson
