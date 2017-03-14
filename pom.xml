@@ -411,7 +411,7 @@
             </dependency>
             <dependency>
                 <groupId>com.typesafe.akka</groupId>
-                <artifactId>akka-http-spray-${scala.tools.version}</artifactId>
+                <artifactId>akka-http-spray-json_${scala.tools.version}</artifactId>
                 <version>10.0.4</version>
             </dependency>
 
