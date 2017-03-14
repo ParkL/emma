@@ -220,6 +220,20 @@ protected[emmalanguage] trait API extends AST {
     //@formatter:on
   }
 
+  class GuiDataBag$API(mod: u.ModuleSymbol) extends ModuleAPI {
+    val sym                   = mod
+
+    val empty                 = op("empty")
+    val apply                 = op("apply")
+    val readCSV               = op("readCSV")
+    val readParquet           = op("readParquet")
+    val readText              = op("readText")
+    val ref                   = op("ref")
+    val ops                   = Set(empty, apply, readCSV, readParquet, readText)
+    val opsByName             = ops.map { o => o.name -> o }.toMap
+  }
+
+
   /** Backend-specific APIs. This trait should be implemented by each backend. */
   trait BackendAPI {
 
@@ -273,6 +287,7 @@ protected[emmalanguage] trait API extends AST {
 
     object DSCFAnnotations extends DSCFAnnotationsAPI
 
+    object GuiDataBag$ extends GuiDataBag$API(api.Sym[org.emmalanguage.gui.GuiDataBag.type].asModule)
   }
 
 }

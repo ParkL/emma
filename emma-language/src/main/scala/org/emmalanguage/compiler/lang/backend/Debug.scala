@@ -43,8 +43,8 @@ private[backend] trait Debug extends Common { self: Backend with Core =>
             pos = lhs.pos
           )
           val refCall = core.DefCall(
-            Some(core.Ref(GuiDataBagAPI.module)),
-            GuiDataBagAPI.ref,
+            Some(core.Ref(em.GuiDataBag$.sym)),
+            em.GuiDataBag$.ref,
             Seq(rhs.tpe.typeArgs.head),
             Seq(Seq(core.Ref(lhsOp), core.Lit(lhs.name.toString)))
           )
@@ -59,10 +59,10 @@ private[backend] trait Debug extends Common { self: Backend with Core =>
         // Redirect calls to the Bag Module
         // DatBag.apply(1 to 10) => GuiDataBag(1 to 10)
         case Attr.none(core.DefCall(Some(core.Ref(sym)), member, tpes, argss))
-          if sym == API.bagModuleSymbol && (API.sourceOps contains member) =>
+          if sym == em.DataBag$.sym && (em.DataBag$.ops contains member) =>
           core.DefCall(
-            Some(core.Ref(GuiDataBagAPI.module)),
-            GuiDataBagAPI.opsByName(member.name),
+            Some(core.Ref(em.GuiDataBag$.sym)),
+            em.GuiDataBag$.opsByName(member.name),
             tpes,
             argss
           )
