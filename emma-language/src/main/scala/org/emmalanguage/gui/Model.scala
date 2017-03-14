@@ -20,10 +20,9 @@ import org.emmalanguage.api.Meta
 import org.emmalanguage.io.csv.CSV
 import org.emmalanguage.io.parquet.Parquet
 
-import spray.json.DefaultJsonProtocol
-
 object Model {
   sealed trait DataFlow
+  // Sources
   // Sources
   case class ReadCsv(path: String, format: CSV) extends DataFlow
   case class ReadText(path: String) extends DataFlow
