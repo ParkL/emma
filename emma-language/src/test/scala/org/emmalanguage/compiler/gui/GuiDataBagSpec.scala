@@ -79,7 +79,7 @@ class GuiDataBagSpec extends BaseCompilerSpec {
 
       act shouldBe alphaEqTo(exp)
     }
-    """Read Parquet problematic stuff""" in {
+    """Debug Wordcount""" in {
       val input: String = null
       val output: String = null
 
@@ -93,7 +93,7 @@ class GuiDataBagSpec extends BaseCompilerSpec {
       val act2 = liftCombineInsert(u.reify{
         val words = for {
           line <- DataBag.readText(input)
-          word <- DataBag[String](line.toLowerCase.split("\\W+"))
+          word <- DataBag(line.toLowerCase.split("\\W+"))
         } yield word
 
         val counts = for {
@@ -102,8 +102,15 @@ class GuiDataBagSpec extends BaseCompilerSpec {
         counts.writeText(output)
       })
 
+      val exp = liftCombine(u.reify{
+        val docs = GuiDataBag.readText(input)
+        val words = docs.map(_.toLowerCase().split("\\W+"))
+        val counts = words.groupBy(Predef.identity).map(g => (g.key, g.values.size))
+        counts.writeText(output)
+      })
 
-      println(act2)
+      act shouldBe alphaEqTo(exp)
+      act2 shouldBe a [u.Tree]
     }
 
     """Marshaling / unmarshaling""" in {
