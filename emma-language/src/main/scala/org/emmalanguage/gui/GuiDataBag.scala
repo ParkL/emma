@@ -16,6 +16,7 @@
 package org.emmalanguage
 package gui
 
+import scala.language.higherKinds
 import api._
 import org.emmalanguage.io.csv.CSV
 import org.emmalanguage.io.csv.CSVConverter

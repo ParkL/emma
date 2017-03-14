@@ -225,7 +225,6 @@ protected[emmalanguage] trait API extends AST {
     val opsByName             = ops.map { o => o.name -> o }.toMap
   }
 
-
   /** Backend-specific APIs. This trait should be implemented by each backend. */
   trait BackendAPI {
 
