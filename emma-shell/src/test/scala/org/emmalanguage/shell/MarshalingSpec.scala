@@ -18,12 +18,12 @@ package shell
 
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
+import spray.json._
 
-class MarshalingSpec extends FreeSpec with Matchers with JsonProtocol {
+class MarshalingSpec extends FreeSpec with Matchers with LineModel {
   import gui.Model._
   import io.parquet._
   import io.csv._
-  import spray.json._
 
   """Marshaling / unmarshaling""" in {
     val map: DataFlow = Map("map", ReadText("textPath"))

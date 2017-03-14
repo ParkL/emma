@@ -16,15 +16,14 @@
 package org.emmalanguage
 package shell
 
-import org.emmalanguage.api.Meta
-
+import api.Meta
+import io.csv.CSV
+import io.parquet.Parquet
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json._
 
-trait JsonProtocol extends SprayJsonSupport with DefaultJsonProtocol {
-  import io.csv.CSV
-  import io.parquet.Parquet
-  import org.emmalanguage.gui.Model._
+trait LineModel extends SprayJsonSupport with DefaultJsonProtocol {
+  import gui.Model._
 
   // TODO make proper format
   implicit object ParquetFormat extends JsonFormat[Parquet] {
@@ -44,27 +43,6 @@ trait JsonProtocol extends SprayJsonSupport with DefaultJsonProtocol {
   }
 
   implicit object DataBagNodeFormat extends RootJsonFormat[DataFlow] {
-    implicit val readCsvFormat: RootJsonFormat[ReadCsv] = jsonFormat2(ReadCsv)
-    implicit val readTextFormat: RootJsonFormat[ReadText] = jsonFormat1(ReadText)
-    implicit val readParquetFormat: RootJsonFormat[ReadParquet] = jsonFormat2(ReadParquet)
-    implicit val refFormat: RootJsonFormat[Ref] = jsonFormat1(Ref)
-    implicit val fromFormat: RootJsonFormat[From] = jsonFormat1(From)
-
-    implicit val mapFormat: RootJsonFormat[Map] = jsonFormat2(Map)
-    implicit val foldFormat: RootJsonFormat[Fold] = jsonFormat4(Fold)
-    implicit val flatMapFormat: RootJsonFormat[FlatMap] = jsonFormat2(FlatMap)
-    implicit val filterFormat: RootJsonFormat[Filter] = jsonFormat2(Filter)
-    implicit val groupByFormat: RootJsonFormat[GroupBy] = jsonFormat2(GroupBy)
-    implicit val unionFormat: RootJsonFormat[Union] = jsonFormat2(Union)
-    implicit val distinctFormat: RootJsonFormat[Distinct] = jsonFormat1(Distinct)
-    implicit val fetchFormat: RootJsonFormat[Fetch] = jsonFormat1(Fetch)
-    implicit val joinFormat: RootJsonFormat[Join] = jsonFormat4(Join)
-    implicit val crossFormat: RootJsonFormat[Cross] = jsonFormat2(Cross)
-
-    implicit val bindFormat: RootJsonFormat[Bind] = jsonFormat2(Bind)
-    implicit val writeCsvFormat: RootJsonFormat[WriteCsv] = jsonFormat3(WriteCsv)
-    implicit val writeTextFormat: RootJsonFormat[WriteText] = jsonFormat2(WriteText)
-    implicit val writeParquet: RootJsonFormat[WriteParquet] = jsonFormat3(WriteParquet)
 
     private def mixinType[A <: DataFlow : JsonFormat : Meta](node: A): JsObject = {
       implicitly[JsonFormat[A]].write(node) match {
@@ -142,4 +120,26 @@ trait JsonProtocol extends SprayJsonSupport with DefaultJsonProtocol {
       case wp: WriteParquet => mixinType(wp).toJson
     }
   }
+
+  implicit val readCsvFormat: RootJsonFormat[ReadCsv] = jsonFormat2(ReadCsv)
+  implicit val readTextFormat: RootJsonFormat[ReadText] = jsonFormat1(ReadText)
+  implicit val readParquetFormat: RootJsonFormat[ReadParquet] = jsonFormat2(ReadParquet)
+  implicit val refFormat: RootJsonFormat[Ref] = jsonFormat1(Ref)
+  implicit val fromFormat: RootJsonFormat[From] = jsonFormat1(From)
+
+  implicit val mapFormat: RootJsonFormat[Map] = jsonFormat2(Map)
+  implicit val foldFormat: RootJsonFormat[Fold] = jsonFormat4(Fold)
+  implicit val flatMapFormat: RootJsonFormat[FlatMap] = jsonFormat2(FlatMap)
+  implicit val filterFormat: RootJsonFormat[Filter] = jsonFormat2(Filter)
+  implicit val groupByFormat: RootJsonFormat[GroupBy] = jsonFormat2(GroupBy)
+  implicit val unionFormat: RootJsonFormat[Union] = jsonFormat2(Union)
+  implicit val distinctFormat: RootJsonFormat[Distinct] = jsonFormat1(Distinct)
+  implicit val fetchFormat: RootJsonFormat[Fetch] = jsonFormat1(Fetch)
+  implicit val joinFormat: RootJsonFormat[Join] = jsonFormat4(Join)
+  implicit val crossFormat: RootJsonFormat[Cross] = jsonFormat2(Cross)
+
+  implicit val bindFormat: RootJsonFormat[Bind] = jsonFormat2(Bind)
+  implicit val writeCsvFormat: RootJsonFormat[WriteCsv] = jsonFormat3(WriteCsv)
+  implicit val writeTextFormat: RootJsonFormat[WriteText] = jsonFormat2(WriteText)
+  implicit val writeParquet: RootJsonFormat[WriteParquet] = jsonFormat3(WriteParquet)
 }
