@@ -88,7 +88,11 @@ object GuiDataBag {
   }
 
   def empty[A: Meta]: DataBag[A] = new GuiDataBag[A](DataBag.empty[A], Ref("empty"))
-  def apply[A: Meta](values: Seq[A]): DataBag[A] = new GuiDataBag[A](DataBag.apply(values), Ref(values.toString))
+  def apply[A: Meta](values: Seq[A]): DataBag[A] =
+    new GuiDataBag[A](DataBag.apply(values), Ref(values.toString))
+
+  def from[DColl[_], A](coll: DColl[A])(implicit conv: DColl[A] => DataBag[A]): DataBag[A] =
+    new GuiDataBag[A](DataBag.from(coll), Ref("external")) // TODO
 
   def ref[A: Meta](dataBag: DataBag[A], ref: String): DataBag[A] =
     new GuiDataBag(dataBag, Ref(ref))

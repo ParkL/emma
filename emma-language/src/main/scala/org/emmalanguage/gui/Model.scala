@@ -29,6 +29,7 @@ object Model {
   case class ReadText(path: String) extends DataFlow
   case class ReadParquet(path: String, format: Parquet) extends DataFlow
   case class Ref(ref: String) extends DataFlow
+  case class From(from: String) extends DataFlow
 
   // Transformations
   case class Map(f: String, xs: DataFlow) extends DataFlow
@@ -74,6 +75,7 @@ object Model {
       implicit val readTextFormat: RootJsonFormat[ReadText] = jsonFormat1(ReadText)
       implicit val readParquetFormat: RootJsonFormat[ReadParquet] = jsonFormat2(ReadParquet)
       implicit val refFormat: RootJsonFormat[Ref] = jsonFormat1(Ref)
+      implicit val fromFormat: RootJsonFormat[From] = jsonFormat1(From)
 
       implicit val mapFormat: RootJsonFormat[Map] = jsonFormat2(Map)
       implicit val foldFormat: RootJsonFormat[Fold] = jsonFormat4(Fold)
@@ -147,6 +149,7 @@ object Model {
         case rt: ReadText => mixinType(rt).toJson
         case rp: ReadParquet => mixinType(rp).toJson
         case r: Ref => mixinType(r).toJson
+        case f: From => mixinType(f).toJson
 
         case m: Map => mixinType(m).toJson
         case f: Fold => mixinType(f).toJson
