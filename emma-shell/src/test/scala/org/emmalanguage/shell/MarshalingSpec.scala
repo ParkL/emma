@@ -16,6 +16,8 @@
 package org.emmalanguage
 package shell
 
+import org.emmalanguage.shell.util.GraphEasySupport
+
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
 import spray.json._
@@ -69,6 +71,8 @@ class MarshalingSpec extends FreeSpec with Matchers with LineModel {
     }
   }
   """mkGraph""" in {
-    println(testFlows.head.mkGraph())
+    val graph = testFlows.head.mkGraph()
+    println(graph)
+    println(GraphEasySupport.mkGraphEasy(graph).mkString("\n"))
   }
 }

@@ -18,10 +18,17 @@ package shell.util
 
 object GraphEasySupport {
   import gui.Model._
-//  def mkGraphEasy(dataFlow: DataFlow): Seq[String] = {
-//
-//
-//  }
+  def mkGraphEasy(edges: Set[(IdAndRep, IdAndRep)]): Seq[String] = {
+    def mkNodeId: IdAndRep =>  String = {
+      case (id, rep) => s"$rep-$id"
+    }
+
+    def renderEdge(edge: (IdAndRep, IdAndRep)): String = {
+      val (from, to) = edge
+      s"[${mkNodeId(from)}] -> [${mkNodeId(to)}]"
+    }
+    edges.map(renderEdge).toSeq
+  }
 
 //    def dwellTimeToString(dwellDuration: DwellDuration) = {
 //      val from :: to :: Nil = List(dwellDuration.from, dwellDuration.to)
@@ -40,6 +47,8 @@ object GraphEasySupport {
 //  }
 
 //  def printGraph(graph: Graph): Int = {
+//
+//
 //    val file = java.io.File.createTempFile("graph", "easy")
 //    val bw = new BufferedWriter(new FileWriter(file))
 //    bw.write(mkGraphEasy(graph).mkString("\n"))
