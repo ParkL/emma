@@ -25,12 +25,7 @@ class MarshalingSpec extends FreeSpec with Matchers with LineModel {
   import io.parquet._
   import io.csv._
 
-  """Marshaling / unmarshaling""" in {
-    val map: DataFlow = Map("map", ReadText("textPath"))
-    val json = map.toJson
-    json.convertTo[DataFlow] shouldBe map
-  }
-  """Complex marshaling example""" in {
+  lazy val testFlows: List[DataFlow] = {
     def mkCrazyFlow(source: DataFlow): DataFlow = {
       val map = Map(f = "mapFun", xs = source)
       val fold = Fold(z = "z", s = "s", u = "u", xs = map)
@@ -50,20 +45,30 @@ class MarshalingSpec extends FreeSpec with Matchers with LineModel {
     val crossWithParquet = Cross(joinWithRef, fromParquet)
     val fetch = Fetch(crossWithParquet)
 
-    val flows: List[DataFlow] = List(
+    List(
       Bind("bind", fetch),
       WriteCsv("csvPath", format = CSV(), fetch),
       WriteText("textPath", fetch),
       WriteParquet("parquetPath", format = Parquet(), fetch)
     )
+  }
 
+  """Marshaling / unmarshaling""" in {
+    val map: DataFlow = Map("map", ReadText("textPath"))
+    val json = map.toJson
+    json.convertTo[DataFlow] shouldBe map
+  }
+  """Complex marshaling example""" in {
     for {
-      f <- flows
+      f <- testFlows
       json = f.toJson
     } {
       println(s"Json for: $f")
       println(json.prettyPrint)
       json.convertTo[DataFlow] shouldBe f
     }
+  }
+  """mkGraph""" in {
+    println(testFlows.head.mkGraph())
   }
 }

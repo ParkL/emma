@@ -23,7 +23,7 @@ import akka.http.scaladsl.server.Directives._
 
 import scala.io.StdIn
 
-object Shell extends App {
+object Shell extends App with LineModel {
   implicit val system = ActorSystem("emma-shell-system")
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
