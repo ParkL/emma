@@ -24,11 +24,23 @@ import akka.http.scaladsl.server.Directives._
 import scala.io.StdIn
 
 object Shell extends App with LineModel {
-  implicit val system = ActorSystem("emma-shell-system")
+  implicit val system = ActorSystem("emma-shell-as")
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
+  // API:
+  //
+  // get / -> List[ExampleID]
+  // post /ExampleId/run -> Session-ID
+  // get /Session-ID -> Option[Graph] // may stall until available in "host" stalls when delivered unless done
+  // put /Session-ID/continue -> Option[Graph] // if Session-Id is stalling, starts the next stage
+
   val route =
+    pathSingleSlash {
+      get {
+        complete(s"Index of examples")
+      }
+    } ~
     path("yield") {
       get {
         complete(s"Hello World")
