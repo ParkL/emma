@@ -19,101 +19,131 @@ package gui
 import org.emmalanguage.io.csv.CSV
 import org.emmalanguage.io.parquet.Parquet
 
+import java.util.UUID
+
 object Model {
   type IdType = java.util.UUID
-  type IdAndRep = (IdType, String)
+  type NodeId = String
 
   sealed trait DataFlow {
-    // TODO make map type -> int for ids
-    //lazy val id: IdType = java.util.UUID.randomUUID()
-    def flatString(): String = s"$toString"
-    def idAndString(): (IdType, String) = java.util.UUID.randomUUID() -> flatString()
+    val id: String
+
+    def flatString(): String
+    def idAndString(): String = s"${flatString()}-$id"
     def children(): List[DataFlow] = List.empty
 
-    def mkGraph(flow: DataFlow): Set[(IdAndRep, IdAndRep)] = {
+    def mkGraph(flow: DataFlow): Set[(NodeId, NodeId)] = {
       val kids = flow.children()
       val lx = for { k <- kids } yield { (flow.idAndString(), k.idAndString())  }
       lx.toSet ++ kids.flatMap(mkGraph)
     }
 
-    def mkGraph(): Set[(IdAndRep, IdAndRep)] = mkGraph(this)
+    def mkGraph(): Set[(NodeId, NodeId)] = mkGraph(this)
   }
   // Sources
-  case class ReadCsv(path: String, format: CSV) extends DataFlow
-  case class ReadText(path: String) extends DataFlow
-  case class ReadParquet(path: String, format: Parquet) extends DataFlow
-  case class Ref(ref: String) extends DataFlow
-  case class From(from: String) extends DataFlow
+  case class ReadCsv(path: String, format: CSV, id: String = UUID.randomUUID().toString) extends DataFlow {
+    override def flatString(): String = s"ReadCsv($path, Csv)"
+  }
+  case class ReadText(path: String, id: String = UUID.randomUUID().toString) extends DataFlow {
+    override def flatString(): String = s"ReadText($path)"
+  }
+  case class ReadParquet(path: String, format: Parquet, id: String = UUID.randomUUID().toString) extends DataFlow {
+    override def flatString(): String = s"ReadParquet($path, Parquet)"
+  }
+  case class Ref(ref: String, id: String = UUID.randomUUID().toString) extends DataFlow {
+    override def flatString(): String = s"Ref($ref)"
+  }
+  case class From(from: String, id: String = UUID.randomUUID().toString) extends DataFlow {
+    override def flatString(): String = s"From($from)"
+  }
 
   // Transformations
-  case class Map(f: String, xs: DataFlow) extends DataFlow {
+  case class Map(f: String, xs: DataFlow, id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"Map($f)"
 
     override def children(): List[DataFlow] = List(xs)
   }
-  case class Fold(z: String, s: String, u: String, xs: DataFlow) extends DataFlow {
+  case class Fold(
+    z: String,
+    s: String,
+    u: String,
+    xs: DataFlow,
+    id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"Fold($z, $s, $u)"
 
     override def children(): List[DataFlow] = List(xs)
   }
-  case class FlatMap(f: String, xs: DataFlow) extends DataFlow {
+  case class FlatMap(f: String, xs: DataFlow, id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"FlatMap($f)"
 
     override def children(): List[DataFlow] = List(xs)
   }
-  case class Filter(p: String, xs: DataFlow) extends DataFlow {
+  case class Filter(p: String, xs: DataFlow, id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"Filter($p)"
 
     override def children(): List[DataFlow] = List(xs)
   }
-  case class GroupBy(k: String, xs: DataFlow) extends DataFlow {
+  case class GroupBy(k: String, xs: DataFlow, id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"GroupBy($k)"
 
     override def children(): List[DataFlow] = List(xs)
   }
-  case class Union(xs: DataFlow, ys: DataFlow) extends DataFlow {
+  case class Union(xs: DataFlow, ys: DataFlow, id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"Union"
 
     override def children(): List[DataFlow] = List(xs, ys)
   }
-  case class Distinct(xs: DataFlow) extends DataFlow {
+  case class Distinct(xs: DataFlow, id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"Distinct"
 
     override def children(): List[DataFlow] = List(xs)
   }
-  case class Fetch(xs: DataFlow) extends DataFlow {
+  case class Fetch(xs: DataFlow, id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"Fetch"
 
     override def children(): List[DataFlow] = List(xs)
   }
-  case class Join(kx: String, ky: String, xs: DataFlow, ys: DataFlow) extends DataFlow {
+  case class Join(
+    kx: String,
+    ky: String,
+    xs: DataFlow,
+    ys: DataFlow,
+    id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"Join($kx, $ky)"
 
     override def children(): List[DataFlow] = List(xs, ys)
   }
-  case class Cross(xs: DataFlow, ys: DataFlow) extends DataFlow {
+  case class Cross(xs: DataFlow, ys: DataFlow, id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"Cross"
 
     override def children(): List[DataFlow] = List(xs, ys)
   }
 
   // Sinks
-  case class Bind(bind: String, xs: DataFlow) extends DataFlow {
+  case class Bind(bind: String, xs: DataFlow, id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"Bind($bind)"
 
     override def children(): List[DataFlow] = List(xs)
   }
-  case class WriteCsv(path: String, format: CSV, xs: DataFlow) extends DataFlow {
+  case class WriteCsv(
+    path: String,
+    format: CSV,
+    xs: DataFlow,
+    id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"WriteCsv($path, format)"
 
     override def children(): List[DataFlow] = List(xs)
   }
-  case class WriteText(path: String, xs: DataFlow) extends DataFlow {
+  case class WriteText(path: String, xs: DataFlow, id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"WriteText($path)"
 
     override def children(): List[DataFlow] = List(xs)
   }
-  case class WriteParquet(path: String, format: Parquet, xs: DataFlow) extends DataFlow {
+  case class WriteParquet(
+    path: String,
+    format: Parquet,
+    xs: DataFlow,
+    id: String = UUID.randomUUID().toString) extends DataFlow {
     override def flatString(): String = s"WriteParquet($path)"
 
     override def children(): List[DataFlow] = List(xs)

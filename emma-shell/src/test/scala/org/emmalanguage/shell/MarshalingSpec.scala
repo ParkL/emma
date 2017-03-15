@@ -72,7 +72,6 @@ class MarshalingSpec extends FreeSpec with Matchers with LineModel {
   }
   """mkGraph""" in {
     val graph = testFlows.head.mkGraph()
-    println(graph)
-    println(GraphEasySupport.mkGraphEasy(graph).mkString("\n"))
+    for (print <- GraphEasySupport.printer() ) print(graph)
   }
 }
