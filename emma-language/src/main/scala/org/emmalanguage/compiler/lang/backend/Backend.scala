@@ -37,6 +37,6 @@ trait Backend extends Common
 
     /** Delegates to [[Caching.addCacheCalls]]. */
     lazy val addCacheCalls = Caching.addCacheCalls
-    lazy val addGuiDatabagCalls = Debug.addGuiDatabagCalls
+    lazy val addGuiDatabagCalls = Debug.addGuiDatabagCalls _
   }
 }

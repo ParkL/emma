@@ -39,13 +39,13 @@ object GuiOps extends ComprehensionCombinators[GuiEnv] with Runtime[GuiEnv] {
   def cross[A, B](
     xs: DataBag[A], ys: DataBag[B]
   )(implicit A: Meta[A], B: Meta[B], env: GuiEnv): DataBag[(A, B)] =
-    env.combinatorOps.cross(xs, ys)(A, B, env.rt)
+    env.ops.cross(xs, ys)(A, B, env.rt)
 
   /** Naive `equiJoin` node. */
-  def equiJoin[A: Meta, B: Meta, K: Meta](
+  def equiJoin[A, B, K](
     kx: A => K, ky: B => K)(xs: DataBag[A], ys: DataBag[B]
   )(implicit A: Meta[A], B: Meta[B], K: Meta[K], env: GuiEnv): DataBag[(A, B)] =
-    env.combinatorOps.equiJoin(kx, ky)(xs, ys)(A, B, K, env.rt)
+    env.ops.equiJoin(kx, ky)(xs, ys)(A, B, K, env.rt)
 
   //--------------------------------------------------------
   // Runtime
@@ -53,11 +53,11 @@ object GuiOps extends ComprehensionCombinators[GuiEnv] with Runtime[GuiEnv] {
 
   /** Implement the underlying logical semantics only (identity function). */
   def cache[A](xs: DataBag[A])(implicit A: Meta[A], env: GuiEnv): DataBag[A] =
-    env.runtimeOps.cache(xs)(A, env.rt)
+    env.ops.cache(xs)(A, env.rt)
 
   /** Fuse a groupBy and a subsequent fold into a single operator. */
   def foldGroup[A, B, K](
     xs: DataBag[A], key: A => K, sng: A => B, uni: (B, B) => B
   )(implicit A: Meta[A], B: Meta[B], K: Meta[K], env: GuiEnv): DataBag[(K, B)] =
-    env.runtimeOps.foldGroup(xs, key, sng, uni)(A, B, K, env.rt)
+    env.ops.foldGroup(xs, key, sng, uni)(A, B, K, env.rt)
 }

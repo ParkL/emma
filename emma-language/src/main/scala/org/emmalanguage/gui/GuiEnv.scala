@@ -32,19 +32,19 @@ trait GuiEnv {
   type E
   implicit val rt: E
 
-  def empty[A: Meta](implicit env: E): DataBag[A] =
+  def empty[A: Meta]: DataBag[A] =
     companion.empty[A]
 
-  def apply[A: Meta](values: Seq[A])(implicit env: E): DataBag[A] =
+  def apply[A: Meta](values: Seq[A]): DataBag[A] =
     companion.apply(values)
 
-  def readText(path: String)(implicit env: E): DataBag[String] =
+  def readText(path: String): DataBag[String] =
     companion.readText(path)
 
-  def readCSV[A: Meta : CSVConverter](path: String, format: CSV)(implicit env: E): DataBag[A] =
+  def readCSV[A: Meta : CSVConverter](path: String, format: CSV): DataBag[A] =
     companion.readCSV[A](path, format)
 
-  def readParquet[A: Meta : ParquetConverter](path: String, format: Parquet)(implicit env: E): DataBag[A] =
+  def readParquet[A: Meta : ParquetConverter](path: String, format: Parquet): DataBag[A] =
     companion.readParquet(path, format)
 
   def cross[A, B](
@@ -54,7 +54,7 @@ trait GuiEnv {
       case (xs: GuiDataBag[A], ys: GuiDataBag[B]) => new GuiDataBag(
         dataBag = ops.cross(xs, ys),
         node = Cross(xs.node, ys.node)
-      )
+      )(this)
     }
 
   val ops: ComprehensionCombinators[E] with Runtime[E]
