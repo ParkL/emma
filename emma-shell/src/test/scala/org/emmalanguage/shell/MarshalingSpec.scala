@@ -27,8 +27,8 @@ import spray.json._
 class MarshalingSpec
   extends FreeSpec
     with Matchers
-    with LineModel
-    with ScalatestRouteTest {
+    with ScalatestRouteTest
+    with LineModel {
 
   import gui.Model._
   import io.parquet._

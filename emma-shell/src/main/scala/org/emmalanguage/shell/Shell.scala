@@ -23,12 +23,8 @@ import akka.http.scaladsl.server.Directives._
 
 import scala.io.StdIn
 
-object Shell extends App with LineModel {
-  implicit val system = ActorSystem("emma-shell-as")
-  implicit val materializer = ActorMaterializer()
-  implicit val executionContext = system.dispatcher
+object Shell extends LineModel {
   import gui.Model._
-
   // API:
   //
   // get / -> List[ExampleID]
@@ -55,8 +51,14 @@ object Shell extends App with LineModel {
       }
     }
 
-  val server = Http().bindAndHandle(route, "localhost", 8080)
-  println("Press any key to shut down.")
-  StdIn.readLine()
-  server.flatMap(_.unbind()).onComplete(_ => system.terminate())
+  def main(args: Array[String]): Unit = {
+    implicit val system = ActorSystem("emma-shell-as")
+    implicit val materializer = ActorMaterializer()
+    implicit val executionContext = system.dispatcher
+
+    val server = Http().bindAndHandle(route, "localhost", 8080)
+    println("Press any key to shut down.")
+    StdIn.readLine()
+    server.flatMap(_.unbind()).onComplete(_ => system.terminate())
+  }
 }
