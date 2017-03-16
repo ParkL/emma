@@ -41,7 +41,7 @@ object Shell extends App with LineModel {
   val route =
     pathSingleSlash {
       get {
-        complete(s"Index of examples")
+        complete(s"Hello World")
       }
     } ~
     path("yield") {

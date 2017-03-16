@@ -18,11 +18,18 @@ package shell
 
 import org.emmalanguage.shell.util.GraphEasySupport
 
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.testkit.ScalatestRouteTest
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
 import spray.json._
 
-class MarshalingSpec extends FreeSpec with Matchers with LineModel {
+class MarshalingSpec
+  extends FreeSpec
+    with Matchers
+    with LineModel
+    with ScalatestRouteTest {
+
   import gui.Model._
   import io.parquet._
   import io.csv._
@@ -73,5 +80,21 @@ class MarshalingSpec extends FreeSpec with Matchers with LineModel {
   """mkGraph""" in {
     val graph = testFlows.head.mkGraph()
     for (print <- GraphEasySupport.printer() ) print(graph)
+  }
+
+  """Stupid test""" in {
+    Get("/") ~> Shell.route ~> check {
+      status shouldBe StatusCodes.OK
+      println(responseAs[String])
+      responseAs[String] shouldBe "Hello World"
+    }
+  }
+
+  """Simple route test""" in {
+    Get("/test") ~> Shell.route ~> check {
+      status shouldBe StatusCodes.OK
+      println(responseAs[String])
+      responseAs[DataFlow] shouldBe Shell.flow
+    }
   }
 }

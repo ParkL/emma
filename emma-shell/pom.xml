@@ -110,6 +110,10 @@
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-http-spray-json_${scala.tools.version}</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-http-testkit_${scala.tools.version}</artifactId>
+        </dependency>
 
         <!-- Logging -->
         <dependency>
