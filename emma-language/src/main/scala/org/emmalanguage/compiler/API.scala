@@ -242,7 +242,7 @@ protected[emmalanguage] trait API extends AST {
   }
 
   /** Reflection of the Emma API. */
-  object API {
+  object API extends BackendAPI {
 
     val implicitTypes = Set(
       api.Type[org.emmalanguage.api.Meta[Any]].typeConstructor,
@@ -279,6 +279,8 @@ protected[emmalanguage] trait API extends AST {
     object DSCFAnnotations extends DSCFAnnotationsAPI
 
     object GuiDataBag$ extends GuiDataBag$API(api.Sym[org.emmalanguage.gui.GuiDataBag.type].asModule)
+
+    object GuiOps extends OpsAPI(api.Sym[org.emmalanguage.gui.backend.GuiOps.type].asModule)
   }
 
 }

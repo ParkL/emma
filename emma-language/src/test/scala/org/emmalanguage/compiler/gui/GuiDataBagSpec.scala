@@ -38,7 +38,7 @@ class GuiDataBagSpec extends BaseCompilerSpec {
       Core.lnf,
       Comprehension.combine,
       Core.flatten,
-      tree => time(Backend.addGuiDatabagCalls(tree), "GuiDataBag Calls")
+      tree => time(Backend.addGuiDatabagCalls(API)(tree), "GuiDataBag Calls")
     ).compose(_.tree)
 
   "GuiDataBagSpec" - {

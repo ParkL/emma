@@ -23,4 +23,5 @@ import scala.language.experimental.macros
 object onSpark {
 
   final def apply[T](e: T): T = macro SparkMacro.parallelizeImpl[T]
+  final def debug[T](e: T): T = macro SparkMacro.debugImpl[T]
 }

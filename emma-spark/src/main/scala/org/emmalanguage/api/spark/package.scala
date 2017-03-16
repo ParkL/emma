@@ -19,6 +19,8 @@ package api
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession
+import gui.GuiEnv
+import org.emmalanguage.gui.GuiDataBag
 
 import scala.language.higherKinds
 
@@ -60,5 +62,13 @@ package object spark {
     case bag =>
       throw new RuntimeException(s"Cannot convert a DataBag of type ${bag.getClass.getSimpleName} to a Spark RDD")
   }
+
+  implicit def guiEnv(implicit spark: SparkSession) =
+    new GuiEnv {
+      type E = SparkSession
+      implicit val rt = spark
+      val ops = SparkOps
+      val companion = SparkRDD
+    }
 
 }

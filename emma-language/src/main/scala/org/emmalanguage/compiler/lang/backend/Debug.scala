@@ -26,10 +26,21 @@ private[backend] trait Debug extends Common { self: Backend with Core =>
   private[backend] object Debug {
     import Core.{Lang => core}
     import UniverseImplicits._
+    val guiOpsRef = core.Ref(API.GuiOps.sym)
 
     // TODO cross, equiJoin
-    lazy val addGuiDatabagCalls: u.Tree => u.Tree =
+    def addGuiDatabagCalls(backend: BackendAPI): u.Tree => u.Tree =
       api.BottomUp.withUses.withRoot.transformSyn {
+        // TODO Parameter situation "ParDef"
+        // case DefDef ; fuer alle parameter, wenn vom Typ DataBag,
+        // -> wrappen als GuiDataBag.ref, uses anpassen
+        //
+
+        // TODO
+        case Attr(tree @ core.DefCall(Some(ops), op, tpes, argss), _, _, _)
+          if ops == backend.Ops.sym && (backend.Ops.ops contains op) =>
+          core.DefCall(Some(guiOpsRef), op, tpes, argss)
+
         // val rs1 = db1.map(_ * 2) if uses of the symbol > 1
         //   =>
         // val rs1$2 = db1$2.map(_ * 2)
@@ -59,7 +70,7 @@ private[backend] trait Debug extends Common { self: Backend with Core =>
         // Redirect calls to the Bag Module
         // DatBag.apply(1 to 10) => GuiDataBag(1 to 10)
         case Attr.none(core.DefCall(Some(core.Ref(sym)), member, tpes, argss))
-          if sym == API.DataBag$.sym && (API.DataBag$.ops contains member) =>
+          if sym == backend.DataBag$.sym && (backend.DataBag$.ops contains member) =>
           core.DefCall(
             Some(core.Ref(API.GuiDataBag$.sym)),
             API.GuiDataBag$.opsByName(member.name),

@@ -37,4 +37,24 @@ class SparkMacro(val c: blackbox.Context) extends MacroCompiler with SparkCompil
       Core.inlineLetExprs,
       Core.trampoline
     ).compose(_.tree)
+
+  def debugImpl[T](e: c.Expr[T]): c.Expr[T] = {
+    val res = debugPipeline(e)
+    //c.warning(e.tree.pos, Core.prettyPrint(res))
+    c.Expr[T]((removeShadowedThis andThen unTypeCheck) (res))
+  }
+
+  // TODO merge with paralellizePipeline + arg
+  // 2 seq + maybe debug
+  private lazy val debugPipeline: c.Expr[Any] => u.Tree =
+    pipeline()(
+      LibSupport.expand,
+      Core.lift,
+      Backend.addCacheCalls,
+      Comprehension.combine,
+      Backend.specialize(SparkAPI),
+      Backend.addGuiDatabagCalls(SparkAPI),
+      Core.inlineLetExprs,
+      Core.trampoline
+    ).compose(_.tree)
 }
