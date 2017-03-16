@@ -42,12 +42,6 @@ class GuiDataBagSpec extends BaseCompilerSpec {
     ).compose(_.tree)
 
   "GuiDataBagSpec" - {
-    import Model._
-    // import JsonProtocol._
-    import io.csv._
-    import io.parquet._
-
-    import spray.json._
     """GuiDataBag-Object splice""" in {
       val act = liftCombineInsert(u.reify {
         val db1 = DataBag(1 to 10)

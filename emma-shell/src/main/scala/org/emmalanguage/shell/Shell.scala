@@ -32,7 +32,8 @@ object Shell extends LineModel {
   // get /Session-ID -> Option[Graph] // may stall until available in "host" stalls when delivered unless done
   // put /Session-ID/continue -> Option[Graph] // if Session-Id is stalling, starts the next stage
 
-  val flow =  Map("map", ReadText("textPath"))
+  // TODO brain type ascription is necessary
+  val flow: DataFlow =  Map("map", ReadText("textPath"))
 
   val route =
     pathSingleSlash {

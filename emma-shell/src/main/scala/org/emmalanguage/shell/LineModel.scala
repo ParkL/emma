@@ -61,7 +61,7 @@ trait LineModel extends SprayJsonSupport with DefaultJsonProtocol {
         }
         (JsObject(fields - "type"), tpe)
       case x => deserializationError(
-        s"""Unable to project DataFlow variant. JSON-Object expected, got: `$x'"""
+        s"""Unable to project DataFlow variant (`type` missing?). JSON-Object expected, got: `$x'"""
       )
     }
 
