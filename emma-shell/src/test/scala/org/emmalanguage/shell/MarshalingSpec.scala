@@ -77,17 +77,9 @@ class MarshalingSpec
       json.convertTo[DataFlow] shouldBe f
     }
   }
-  """mkGraph""" in {
+  """mkGraph and GraphEasySupport""" in {
     val graph = testFlows.head.mkGraph()
     for (print <- GraphEasySupport.printer() ) print(graph)
-  }
-
-  """Stupid test""" in {
-    Get("/") ~> Shell.route ~> check {
-      status shouldBe StatusCodes.OK
-      println(responseAs[String])
-      responseAs[String] shouldBe "Hello World"
-    }
   }
 
   """Simple route test""" in {

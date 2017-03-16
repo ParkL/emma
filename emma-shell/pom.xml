@@ -104,6 +104,10 @@
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-testkit_{scala.tools.version}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-http_${scala.tools.version}</artifactId>
         </dependency>
         <dependency>

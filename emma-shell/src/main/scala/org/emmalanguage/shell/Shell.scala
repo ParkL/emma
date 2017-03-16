@@ -36,30 +36,24 @@ object Shell extends LineModel {
   val flow: DataFlow =  Map("map", ReadText("textPath"))
 
   val route =
-    pathSingleSlash {
-      get {
-        complete(s"Hello World")
-      }
-    } ~
-    path("yield") {
-      get {
-        complete(s"Hello World")
-      }
-    } ~
     path("test") {
       get {
         complete(flow)
       }
     }
 
+  def bind(interface: String = "localhost", port: Int = 8080)(implicit system: ActorSystem) = {
+    implicit val materializer = ActorMaterializer()
+    Http().bindAndHandle(route, interface, port)
+  }
+
   def main(args: Array[String]): Unit = {
     implicit val system = ActorSystem("emma-shell-as")
-    implicit val materializer = ActorMaterializer()
     implicit val executionContext = system.dispatcher
-
-    val server = Http().bindAndHandle(route, "localhost", 8080)
-    println("Press any key to shut down.")
-    StdIn.readLine()
-    server.flatMap(_.unbind()).onComplete(_ => system.terminate())
+    for { binding <- bind() } {
+      println(s"Server running at ${binding.localAddress}. Press any key to quit.")
+      StdIn.readLine()
+      binding.unbind().onComplete { _ => system.terminate() }
+    }
   }
 }
